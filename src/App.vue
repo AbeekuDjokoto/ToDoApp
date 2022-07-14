@@ -1,9 +1,7 @@
 <template>
-
-  <app-home></app-home>
-
-  
-
+  <div class="container">
+    <app-home></app-home>
+  </div>
 </template>
 
 <script>
@@ -15,10 +13,24 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+*{
+  margin: 0;
+  padding: 0;
+}
+
+html, body{
+  max-width: 100%;
+  overflow-x: hidden;
+  background: black
+}
+
 #app {
   font-family: 'Josefin Sans', sans-serif;
 }
 
+.container{
+  background: black;
+}
 
 </style>

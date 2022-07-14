@@ -15,30 +15,32 @@
 
     <table class="table">
       <tbody>
-        <tr v-for="(task, index) in tasks" :key="index">
+        <tr v-for="(task, index) in tasksFiltered" :key="task.id">
           <td>
             <div class="info">
               
               <img v-if="complete" :src="uncompletedImg" alt="" @click="completedTask(index)"/>
               <img v-if="!complete" :src="completedImg" alt="" @click="completedTask(index)"/>
-              <p class="para">{{ task.name }}</p>
+              <input type="checkbox" v-model="task.complete">
+              <p class="para" :class="{ completed : task.complete}">{{ task.name }}</p>
               <img class="cross" src="../assets/Cross.svg" alt="" @click="deleteTask(index)"/>
             </div>
           </td>
         </tr>
       </tbody>
+      
       <tfoot>
         <tr class="footerText">
           <div class="itemsLeft">
-            <p>5 items left</p>
+            <p>{{ remaining }} items left</p>
           </div>
           <div class="taskAction">
-            <p>All</p>
-            <p>Active</p>
-            <p>Completed</p>
+            <p :class="{active: filter === 'all'}" @click="filter = 'all'">All</p>
+            <p :class="{active: filter === 'active'}" @click="filter = 'active'">Active</p>
+            <p :class="{active: filter === 'completed'}" @click="filter = 'completed'">Completed</p>
           </div>
-          <div class="completed">
-            <p @click="completelyClear">{{ clearCompleted }}</p>
+          <div>
+            <p class="clearCompleted" @click="completelyClear">{{ clearCompleted }}</p>
           </div>
         </tr>
       </tfoot>
@@ -59,58 +61,60 @@ export default {
       uncompletedImg: require('@/assets/UncompletedTask.svg'),
       complete: true,
       clearCompleted: 'Clear Completed',
-      tasks: [
-        { name: "Steal bananas from the store", uncompletedImg: require('@/assets/UncompletedTask.svg'), complete: false},
-        { name: "Steal bananas from the store" },
-      ],
+      idForTodo: 3,
+      filter: 'all',
+      tasks: [],
     };
+  },
+  computed: {
+    remaining(){
+      return this.tasks.filter(todo => !todo.complete).length
+    },
+    tasksFiltered(){
+      if(this.filter === 'all'){
+        return this.tasks
+      } else if (this.filter === 'active'){
+        return this.tasks.filter(todo => !todo.complete)
+      } else if (this.filter === 'completed'){
+        return this.tasks.filter(todo => todo.complete)
+      }
+
+      return this.tasks
+    }
   },
   methods: {
     submitTask() {
       if (this.task.length === 0) return;
 
       this.tasks.push({
+        id: this.idForTodo,
         name: this.task,
+        completed: false
       });
 
       this.task = "";
+      this.idForTodo++
     },
     deleteTask(index){
         this.tasks.splice(index, 1);
     },
     completedTask(index){
-      //  this.tasks[index].complete = !this.tasks[index].complete
-      //  console.log(this.tasks[index].complete)
-      //  if(this.tasks[index].complete = true){
-      //   this.tasks[index].uncompletedImg = this.completedImg
-      //  } else {
-      //   this.tasks[index].uncompletedImg
-      //  }
       this.complete = !this.complete
     },
     completelyClear(){
-      this.tasks.splice(0, this.task.length)
-      console.log('clicked')
-      console.log(this.tasks.splice(0, this.task.length))
+      this.tasks = this.tasks.filter(todo => !todo.complete)
     }
   },
 };
 </script>
 
 <style scoped>
-.container {
-  height: 100vh;
-  background: linear-gradient(
-    to bottom,
-    #480ca8 0%,
-    #480ca8 50%,
-    #03071e 50%,
-    #03071e 100%
-  );
-}
-
 .containerStuff {
   text-align: center;
+  background-image: url('../assets/desktop.jpg');
+  background-size: 100% 120%;
+  background-repeat: no-repeat;
+  padding-bottom: 85px;
 }
 
 .todoFlex {
@@ -120,18 +124,12 @@ export default {
   align-items: center;
 }
 
-/* .crossFlex{
-    position: relative;
-    left: 500px;
-} */
-
 .heroLogo {
   font-family: "Josefin Sans";
   font-style: normal;
   font-weight: 700;
   font-size: 40px;
   line-height: 40px;
-  /* identical to box height */
   letter-spacing: 15px;
   color: #ffffff;
   margin-right: 395px;
@@ -145,7 +143,6 @@ input {
   font-weight: 400;
   font-size: 18px;
   line-height: 18px;
-  /* identical to box height */
   letter-spacing: -0.25px;
   color: #767992;
   padding: 23px 312px 23px 72px;
@@ -158,19 +155,18 @@ input {
   font-weight: 400;
   font-size: 18px;
   line-height: 18px;
-  /* identical to box height */
   letter-spacing: -0.25px;
   color: #767992;
 }
 
 .table {
-  margin-top: 5px;
+  position: relative;
+  top: -50px;
   background: #25273d;
   box-shadow: 0px 35px 50px -15px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 24px;
   width: 600px;
 }
 
@@ -182,7 +178,6 @@ input {
   font-weight: 700;
   font-size: 14px;
   line-height: 14px;
-  /* identical to box height */
   letter-spacing: -0.194444px;
   padding: 16px 24px 20px 24px;
 }
@@ -211,7 +206,6 @@ input {
   font-weight: 400;
   font-size: 18px;
   line-height: 18px;
-  /* identical to box height */
   letter-spacing: -0.25px;
   color: #c8cbe7;
   margin-left: 24px;
@@ -223,24 +217,39 @@ input {
   cursor: pointer;
 }
 
-.cross:hover {
-  background-color: red;
-}
-
 .activeClass{
     color: red
 }
 
+.completed{
+  color: grey;
+}
+
+.active{
+  color: #3A7CFD;
+}
+
+.active:hover{
+    color: #E3E4F1;
+}
+
+.taskAction p{
+  cursor: pointer;
+}
+
+.clearCompleted{
+  cursor: pointer;
+}
+
+.space{
+  display: none;
+}
+
 @media only screen and (max-width: 375px) {
-  .container {
-    background: linear-gradient(
-      to bottom,
-      #480ca8 0%,
-      #480ca8 35%,
-      #03071e 35%,
-      #03071e 100%
-    );
+  .containerStuff {
+    background-image: url('../assets/desktop.jpg');
     text-align: center;
+    background-repeat: no-repeat;
   }
 
   input {
@@ -252,7 +261,6 @@ input {
     font-weight: 400;
     font-size: 12px;
     line-height: 12px;
-    /* identical to box height */
     letter-spacing: -0.166667px;
     color: #767992;
     border: none;
@@ -267,5 +275,29 @@ input {
   .heroLogo {
     margin-right: 119px;
   }
+  .table {
+  margin-top: 16px;
+  width: 328px;
+}
+
+.footerText {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0px 20px 0px;
+}
+
+.itemsLeft {
+  display: none;
+}
+
+.clearCompleted{
+  display: none;
+}
+
+.cross {
+  left: 310px;
+  height: 12px;
+}
+
 }
 </style>

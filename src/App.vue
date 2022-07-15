@@ -22,15 +22,10 @@ export default {
 html, body{
   max-width: 100%;
   overflow-x: hidden;
-  background: black
 }
 
 #app {
   font-family: 'Josefin Sans', sans-serif;
-}
-
-.container{
-  background: black;
 }
 
 </style>
